@@ -18,10 +18,7 @@ def processCommand(c):
     elif "open youtube" in c.lower():
         webbrowser.open("https://youtube.com")
     
-
-
-
-
+ 
 
 if __name__ == "__main__":
     speak("Initializing Jarvis....")
@@ -45,3 +42,5 @@ if __name__ == "__main__":
 
         except Exception as e:
             print("Error; {0}".format(e))
+
+            
