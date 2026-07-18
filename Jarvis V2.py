@@ -17,10 +17,11 @@ def processCommand(c):
         webbrowser.open("https://facebook.com")
     elif "open youtube" in c.lower():
         webbrowser.open("https://youtube.com")
-    elif c.lower().startwith("play"):
-        song = c.lower().split(" ")[1]
-        link = musicLibrary.music[song]
-        webbrowser.open(link)
+    
+
+
+
+
 
 if __name__ == "__main__":
     speak("Initializing Jarvis....")
