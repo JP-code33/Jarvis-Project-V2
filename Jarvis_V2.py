@@ -1,0 +1,94 @@
+import speech_recognition as sr
+import webbrowser
+import os
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+import win32com.client
+
+load_dotenv()
+recognizaer = sr.Recognizer()
+#engine = pyttsx3.init()
+
+def speak(text):
+    if not text:
+        return
+    print(f"Jarvis: {text}")
+    try:
+        speaker = win32com.client.Dispatch("SAPI.SpVoice")
+        speaker.Speak(text)
+    except Exception as e:
+        print(f"[Speech Error]: {e}")
+
+def aiCommand(command):
+    try:
+        secret_key = os.getenv("GEMINI_API_KEY")
+
+        if not secret_key:
+            print("Error: GEMINI_API_KEY is not set or .env file wasn't found.")
+            return "My key configuration is missing, Sir."
+        
+        client = genai.Client(api_key=secret_key)
+
+        response = client.models.generate_content(
+            model="gemini-3.5-flash",
+            contents=command,
+            config=types.GenerateContentConfig(
+                system_instruction="You are a virtual assistant named Jarvis skilled in general tasks. Respond in one short sentence."
+            )
+        )
+        return response.text
+    except Exception as e:
+        print(f"Gemini API Eror: {e}")
+        return "My network paths are currently offline, Sir!"
+
+def processCommand(c):
+    if "open google" in c.lower():
+        webbrowser.open("https://google.com")
+    elif "open facebook" in c.lower():
+        webbrowser.open("https://facebook.com")
+    elif "open youtube" in c.lower():
+        webbrowser.open("https://youtube.com")
+    else:
+        speak("Consulting artificial intelligence core...")
+        
+
+        ai_reply = aiCommand(c)
+
+        speak(ai_reply)
+      
+ 
+
+if __name__ == "__main__":
+
+    speak("Initializing Jarvis....")
+
+    r = sr.Recognizer()
+    
+    # Adjust microphone for ambient noise once at the start
+    with sr.Microphone() as source:
+        print("[DEBUG] Calibrating microphone for ambient noise...")
+        r.adjust_for_ambient_noise(source, duration=1)
+        print("[DEBUG] Microphone calibrated.")
+
+    while True:
+        r = sr.Recognizer()
+
+        print("recongnizing...")        
+        try:
+            with sr.Microphone() as source:
+                print("Listening...")
+                audio = r.listen(source, timeout=3, phrase_time_limit=3)
+                word = r.recognize_google(audio)
+            if(word.lower() == "jarvis"):
+                speak("Yes Sir")
+                with sr.Microphone() as source:
+                    print("Jarvis Active...")
+                    audio = r.listen(source)
+                    command = r.recognize_google(audio)
+
+                    processCommand(command)
+
+        except Exception as e:
+            print("Error; {0}".format(e))        
+
