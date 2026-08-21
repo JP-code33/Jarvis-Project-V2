@@ -2,8 +2,7 @@ import speech_recognition as sr
 import webbrowser
 import os
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from groq import Groq
 import win32com.client
 
 load_dotenv()
@@ -22,24 +21,30 @@ def speak(text):
 
 def aiCommand(command):
     try:
-        secret_key = os.getenv("GEMINI_API_KEY")
+        secret_key = os.getenv("GROQ_API_KEY")
 
         if not secret_key:
-            print("Error: GEMINI_API_KEY is not set or .env file wasn't found.")
+            print("Error: GROQ_API_KEY is not set or .env file wasn't found.")
             return "My key configuration is missing, Sir."
         
-        client = genai.Client(api_key=secret_key)
+        client = Groq(api_key=secret_key)
 
-        response = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=command,
-            config=types.GenerateContentConfig(
-                system_instruction="You are a virtual assistant named Jarvis skilled in general tasks. Respond in one short sentence."
-            )
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a virtual asistant named Jarvis skilled in general tasks. Respond the questions."
+                },
+                {
+                    "role": "user",
+                    "content": command
+                }
+            ]
         )
-        return response.text
+        return response.choices[0].message.content
     except Exception as e:
-        print(f"Gemini API Eror: {e}")
+        print(f"Groq API Eror: {e}")
         return "My network paths are currently offline, Sir!"
 
 def processCommand(c):
